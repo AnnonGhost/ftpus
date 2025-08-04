@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { db } from '@/lib/db-vercel'
 import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
@@ -10,6 +10,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Email and password are required' },
         { status: 400 }
+      )
+    }
+
+    // Check if database is available
+    if (!db) {
+      return NextResponse.json(
+        { error: 'Database service unavailable. Please try again later.' },
+        { status: 503 }
       )
     }
 
@@ -59,6 +67,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Login error:', error)
+    
+    // Handle specific database errors
+    if (error instanceof Error && error.message.includes('database')) {
+      return NextResponse.json(
+        { error: 'Database service temporarily unavailable. Please try again later.' },
+        { status: 503 }
+      )
+    }
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
