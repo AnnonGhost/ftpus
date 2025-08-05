@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { initializeVercelDatabase } from '@/lib/init-vercel-db'
+import { initializePostgresDatabase } from '@/lib/init-postgres'
+import { isUsingPostgres, isUsingMemoryDatabase } from '@/lib/db-memory'
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,11 +14,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await initializeVercelDatabase()
+    let result
+
+    // Initialize based on database type
+    if (isUsingPostgres) {
+      result = await initializePostgresDatabase()
+    } else if (isUsingMemoryDatabase) {
+      // For in-memory database, data is already initialized
+      result = { 
+        success: true, 
+        message: 'In-memory database initialized automatically',
+        databaseType: 'memory'
+      }
+    } else {
+      // Fallback to Vercel initialization
+      result = await initializePostgresDatabase()
+    }
     
     if (result.success) {
       return NextResponse.json({
         message: 'Database initialized successfully',
+        databaseType: isUsingPostgres ? 'postgresql' : isUsingMemoryDatabase ? 'memory' : 'unknown',
         details: result.message
       })
     } else {
@@ -48,11 +65,27 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const result = await initializeVercelDatabase()
+    let result
+
+    // Initialize based on database type
+    if (isUsingPostgres) {
+      result = await initializePostgresDatabase()
+    } else if (isUsingMemoryDatabase) {
+      // For in-memory database, data is already initialized
+      result = { 
+        success: true, 
+        message: 'In-memory database initialized automatically',
+        databaseType: 'memory'
+      }
+    } else {
+      // Fallback to Vercel initialization
+      result = await initializePostgresDatabase()
+    }
     
     if (result.success) {
       return NextResponse.json({
         message: 'Database initialized successfully',
+        databaseType: isUsingPostgres ? 'postgresql' : isUsingMemoryDatabase ? 'memory' : 'unknown',
         details: result.message
       })
     } else {

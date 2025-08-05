@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { db, isUsingMemoryDatabase } from '@/lib/db-memory'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,7 +10,8 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json({
-      plans
+      plans,
+      usingMemoryDatabase: isUsingMemoryDatabase
     })
 
   } catch (error) {
@@ -49,7 +50,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: 'Plan created successfully',
-      plan
+      plan,
+      usingMemoryDatabase: isUsingMemoryDatabase
     })
 
   } catch (error) {

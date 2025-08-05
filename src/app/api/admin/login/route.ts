@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { db, isUsingMemoryDatabase } from '@/lib/db-memory'
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,7 +32,8 @@ export async function POST(request: NextRequest) {
       admin: {
         id: admin.id,
         email: admin.email
-      }
+      },
+      usingMemoryDatabase: isUsingMemoryDatabase
     })
 
   } catch (error) {

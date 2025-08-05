@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db-vercel'
+import { db, isUsingMemoryDatabase } from '@/lib/db-memory'
 import bcrypt from 'bcryptjs'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -11,14 +11,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Name, email, and password are required' },
         { status: 400 }
-      )
-    }
-
-    // Check if database is available
-    if (!db) {
-      return NextResponse.json(
-        { error: 'Database service unavailable. Please try again later.' },
-        { status: 503 }
       )
     }
 
@@ -66,20 +58,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: 'Registration successful',
-      user: userWithoutPassword
+      user: userWithoutPassword,
+      usingMemoryDatabase: isUsingMemoryDatabase
     })
 
   } catch (error) {
     console.error('Registration error:', error)
-    
-    // Handle specific database errors
-    if (error instanceof Error && error.message.includes('database')) {
-      return NextResponse.json(
-        { error: 'Database service temporarily unavailable. Please try again later.' },
-        { status: 503 }
-      )
-    }
-
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
